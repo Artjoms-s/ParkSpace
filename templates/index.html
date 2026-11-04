@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Autostāvvietas · ParkSpace{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-copy-block">
+    <p class="eyebrow">VIEGLĀKA STĀVVIETAS MEKLĒŠANA</p>
+    <h1>Atrodi savu<br><span>stāvvietu.</span></h1>
+    <p class="hero-copy">Apskati autostāvvietas plānu un rezervē izvēlēto vietu sev vajadzīgajā laikā.</p>
+  </div>
+  <div class="hero-stat"><span class="stat-number">{{ count_free }}</span><span>vietas bez aktīvām rezervācijām</span></div>
+</section>
+
+<div class="section-heading">
+  <div><h2>Autostāvvietas plāns</h2><p>Skats no augšas. Izvēlies vietu un pārbaudi tās pieejamību vajadzīgajā laikā.</p></div>
+  <div class="legend">
+    <span><i class="dot free"></i> Brīva</span>
+    <span><i class="dot reserved"></i> Ir rezervācija</span>
+    <span><i class="dot occupied"></i> Aizņemta</span>
+  </div>
+</div>
+
+<div class="parking-lot" aria-label="Autostāvvietas plāns">
+  {% for zone, items in spaces|groupby('zone') %}
+    <section class="parking-row">
+      <div class="zone-caption"><span class="zone-badge">ZONA {{ zone }}</span><span>{{ items|length }} stāvvietas</span></div>
+      <div class="parking-grid">
+        {% for space in items %}
+          {% set state = 'occupied' if space.status == 'occupied' else ('inactive' if space.status == 'inactive' else ('reserved' if space.has_reservation else 'free')) %}
+          <article class="space-card {{ state }}">
+            <div class="space-top"><span class="space-code">{{ space.code }}</span><span class="spot-indicator" aria-hidden="true"></span></div>
+            <div class="parking-car" aria-hidden="true"><span class="car-window"></span><span class="car-windshield"></span><span class="car-light front-left"></span><span class="car-light front-right"></span><span class="car-light rear-left"></span><span class="car-light rear-right"></span></div>
+            <span class="status-label">
+              {% if space.status == 'occupied' %}Aizņemta
+              {% elif space.status == 'inactive' %}Neaktīva
+              {% elif space.has_reservation %}Ir rezervācija
+              {% else %}Brīva{% endif %}
+            </span>
+            {% if space.status == 'available' %}
+              <a class="small-button" href="{{ url_for('reserve', space_id=space.id) }}">{{ 'Pārbaudīt laiku' if space.has_reservation else 'Rezervēt' }}</a>
+            {% else %}
+              <span class="disabled-label">Nav pieejama</span>
+            {% endif %}
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+    {% if not loop.last %}
+      <div class="drive-lane"><span class="lane-arrow">←</span><span>BRAUKŠANAS JOSLA</span><span class="lane-arrow">→</span></div>
+    {% endif %}
+  {% endfor %}
+  <div class="lot-footer"><span>↗ Iebraukšana</span><span>Demonstrācijas autostāvvieta · 12 vietas</span></div>
+</div>
+<div class="notice"><strong>Par datiem:</strong> sākotnējie aizņemtības statusi ir demonstrācijas dati, reāli sensori nav pieslēgti. “Ir rezervācija” nozīmē, ka vietai ir vismaz viena aktīva nākotnes rezervācija; citam laika periodam vietu vēl var rezervēt, ja tas nepārklājas ar esošo rezervāciju.</div>
+{% endblock %}

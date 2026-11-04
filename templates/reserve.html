@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Rezervēt {{ space.code }} · ParkSpace{% endblock %}
+{% block content %}
+<a class="back-link" href="{{ url_for('index') }}">← Atpakaļ uz autostāvvietām</a>
+<section class="form-layout">
+  <div class="form-intro">
+    <p class="eyebrow">REZERVĀCIJAS IZVEIDE</p>
+    <h1>Rezervē vietu <span>{{ space.code }}</span></h1>
+    <p>Izvēlies sākuma un beigu datumu un laiku. Vārds nav jāievada — rezervācija tiks piesaistīta tavam kontam.</p>
+    <div class="selected-space"><div class="car-shape"><span></span></div><div><strong>{{ space.code }}</strong><small>Zona {{ space.zone }} · Autostāvvieta</small></div></div>
+    <div class="time-note"><span class="note-clock">◷</span><div><strong>Laika pārbaude</strong><p>Sistēma neļaus rezervēt vienu vietu divreiz vienā un tajā pašā laika periodā.</p></div></div>
+  </div>
+
+  <form method="post" class="panel form-panel reservation-form" data-reservation-form>
+    <input type="hidden" name="next" value="{{ request.args.get('next', '') }}">
+    <div class="datetime-block">
+      <div class="datetime-title"><span class="step-number">1</span><div><strong>Sākums</strong><small>Kad vēlies ierasties?</small></div></div>
+      <label for="start_date">Datums</label>
+      <input id="start_date" name="start_date" type="date" required value="{{ form_data.start_date }}" data-date-field="start">
+      <input type="hidden" id="start_time" name="start_time" value="{{ form_data.start_time }}">
+      <input type="hidden" id="start_clock" name="start_clock" value="{{ form_data.start_clock }}">
+      <div class="clock-picker" data-clock-picker="start">
+        <button class="clock-display" type="button" data-clock-open aria-haspopup="dialog" aria-expanded="false">
+          <span class="clock-symbol" aria-hidden="true">◷</span><span class="clock-display-text" id="start_clock_label">{{ form_data.start_clock or 'Izvēlies laiku' }}</span><span class="clock-chevron">⌄</span>
+        </button>
+        <div class="clock-popup" hidden role="dialog" aria-label="Sākuma laika izvēle">
+          <div class="clock-popup-top"><div><span class="clock-overline">SĀKUMA LAIKS</span><strong data-clock-title>Izvēlies stundu</strong></div><button type="button" class="clock-close" data-clock-close aria-label="Aizvērt">×</button></div>
+          <div class="clock-periods" data-hour-periods><button type="button" class="period-option active" data-hour-half="0">00–11</button><button type="button" class="period-option" data-hour-half="1">12–23</button></div>
+          <div class="clock-dial" data-clock-dial></div>
+          <div class="clock-footer"><span data-clock-step>1 no 2</span><button type="button" class="clock-back" data-clock-back hidden>Atpakaļ</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="datetime-block">
+      <div class="datetime-title"><span class="step-number">2</span><div><strong>Beigas</strong><small>Kad plāno doties prom?</small></div></div>
+      <label for="end_date">Datums</label>
+      <input id="end_date" name="end_date" type="date" required value="{{ form_data.end_date }}" data-date-field="end">
+      <input type="hidden" id="end_time" name="end_time" value="{{ form_data.end_time }}">
+      <input type="hidden" id="end_clock" name="end_clock" value="{{ form_data.end_clock }}">
+      <div class="clock-picker" data-clock-picker="end">
+        <button class="clock-display" type="button" data-clock-open aria-haspopup="dialog" aria-expanded="false">
+          <span class="clock-symbol" aria-hidden="true">◷</span><span class="clock-display-text" id="end_clock_label">{{ form_data.end_clock or 'Izvēlies laiku' }}</span><span class="clock-chevron">⌄</span>
+        </button>
+        <div class="clock-popup" hidden role="dialog" aria-label="Beigu laika izvēle">
+          <div class="clock-popup-top"><div><span class="clock-overline">BEIGU LAIKS</span><strong data-clock-title>Izvēlies stundu</strong></div><button type="button" class="clock-close" data-clock-close aria-label="Aizvērt">×</button></div>
+          <div class="clock-periods" data-hour-periods><button type="button" class="period-option active" data-hour-half="0">00–11</button><button type="button" class="period-option" data-hour-half="1">12–23</button></div>
+          <div class="clock-dial" data-clock-dial></div>
+          <div class="clock-footer"><span data-clock-step>1 no 2</span><button type="button" class="clock-back" data-clock-back hidden>Atpakaļ</button></div>
+        </div>
+      </div>
+    </div>
+    <button class="primary-button submit-reservation" type="submit">Apstiprināt rezervāciju <span>→</span></button>
+    <p class="form-hint">Rezervācija tiek saglabāta lokālajā SQLite datubāzē tavā datorā.</p>
+  </form>
+</section>
+{% endblock %}

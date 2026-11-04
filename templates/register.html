@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Izveidot kontu · ParkSpace{% endblock %}
+{% block content %}
+<section class="auth-layout">
+  <div class="auth-intro"><p class="eyebrow">TAVS PARKSPACE KONTS</p><h1>Izveido kontu,<br><span>rezervē ērtāk.</span></h1><p>Konts ļauj saglabāt tavas rezervācijas vienuviet. Rezervējot stāvvietu, vārds vairs nav jāievada katru reizi.</p></div>
+  <form method="post" class="panel form-panel auth-panel">
+    <h2>Reģistrācija</h2><p class="auth-subtitle">Aizpildi konta datus, lai turpinātu.</p>
+    <label for="username">Lietotājvārds</label><input id="username" name="username" autocomplete="username" placeholder="Piemēram, parkuser" required minlength="3" maxlength="24" pattern="[A-Za-z0-9_.-]{3,24}">
+    <label for="password">Parole</label><input id="password" name="password" type="password" autocomplete="new-password" placeholder="Vismaz 6 simboli" required minlength="6">
+    <label for="password_confirm">Atkārto paroli</label><input id="password_confirm" name="password_confirm" type="password" autocomplete="new-password" placeholder="Ievadi paroli vēlreiz" required minlength="6">
+    <button class="primary-button" type="submit">Izveidot kontu</button>
+    <p class="auth-switch">Jau ir konts? <a href="{{ url_for('login') }}">Pieslēdzies</a></p>
+  </form>
+</section>
+{% endblock %}

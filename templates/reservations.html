@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Manas rezervācijas · ParkSpace{% endblock %}
+{% block content %}
+<section class="page-heading"><p class="eyebrow">REZERVĀCIJU PĀRSKATS</p><h1>Manas <span>rezervācijas</span></h1><p>Šeit redzamas tikai rezervācijas, kas piesaistītas tavam kontam.</p></section>
+{% if reservations %}
+  <div class="reservation-list">
+    {% for r in reservations %}
+      <article class="reservation-row">
+        <div class="reservation-mark">P</div>
+        <div class="reservation-main"><strong>{{ r.space_code }} · Zona {{ r.zone }}</strong><span>{{ r.start_time|datetime_local }} – {{ r.end_time|datetime_local }}</span></div>
+        <div class="reservation-actions"><span class="pill {{ 'active' if r.status == 'active' else 'cancelled' }}">{{ 'Aktīva' if r.status == 'active' else 'Atcelta' }}</span>{% if r.status == 'active' %}<form method="post" action="{{ url_for('cancel', reservation_id=r.id) }}" onsubmit="return confirm('Vai tiešām atcelt šo rezervāciju?');"><button class="cancel-button" type="submit">Atcelt</button></form>{% endif %}</div>
+      </article>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="empty-state"><div class="empty-icon">P</div><h2>Rezervāciju vēl nav</h2><p>Izvēlies brīvu vietu un izveido pirmo rezervāciju.</p><a class="primary-button inline-button" href="{{ url_for('index') }}">Apskatīt vietas</a></div>
+{% endif %}
+{% endblock %}
