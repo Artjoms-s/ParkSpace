@@ -1,4 +1,4 @@
-# ParkSpace — prototips
+# ParkSpace - prototips
 
 Python + Flask + SQLite tīmekļa prototips autostāvvietu apskatei un rezervēšanai.
 
