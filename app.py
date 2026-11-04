@@ -1,3 +1,4 @@
+import os
 import re
 from datetime import datetime
 from functools import wraps
@@ -8,7 +9,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from database import get_db, init_db
 
 app = Flask(__name__)
-app.secret_key = 'parkspace-local-prototype-session-key'
+app.secret_key = os.environ.get('SECRET_KEY', 'parkspace-local-development-key-change-in-production')
 
 
 @app.template_filter('datetime_local')
@@ -88,13 +89,13 @@ def register():
             return render_template('register.html')
 
         db = get_db()
-        users_before = db.execute('SELECT COUNT(*) FROM users').fetchone()[0]
+        users_before = db.execute('SELECT COUNT(*) AS count FROM users').fetchone()['count']
         try:
             cursor = db.execute(
-                'INSERT INTO users(username, password_hash, created_at) VALUES(?,?,?)',
+                'INSERT INTO users(username, password_hash, created_at) VALUES(?,?,?) RETURNING id',
                 (username, generate_password_hash(password), datetime.now().isoformat(timespec='seconds')),
             )
-            user_id = cursor.lastrowid
+            user_id = cursor.fetchone()['id']
             # Preserve reservations created in the earlier no-account prototype by assigning
             # them to the first account created after the upgrade.
             if users_before == 0:
@@ -102,7 +103,7 @@ def register():
             db.commit()
         except Exception as exc:
             db.rollback()
-            if 'UNIQUE constraint failed' in str(exc):
+            if 'UNIQUE constraint failed' in str(exc) or getattr(exc, 'sqlstate', None) == '23505':
                 flash('Šāds lietotājvārds jau ir aizņemts.', 'error')
                 db.close()
                 return render_template('register.html')
@@ -128,7 +129,7 @@ def login():
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '')
         db = get_db()
-        user = db.execute('SELECT id, username, password_hash FROM users WHERE username=? COLLATE NOCASE', (username,)).fetchone()
+        user = db.execute('SELECT id, username, password_hash FROM users WHERE LOWER(username)=LOWER(?)', (username,)).fetchone()
         db.close()
         if user is None or not check_password_hash(user['password_hash'], password):
             flash('Lietotājvārds vai parole nav pareiza.', 'error')
@@ -260,6 +261,8 @@ def cancel(reservation_id):
     return redirect(url_for('reservations'))
 
 
+# Initialize schema on process startup (including Gunicorn on Render).
+init_db()
+
 if __name__ == '__main__':
-    init_db()
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', '5000')), debug=os.environ.get('FLASK_DEBUG') == '1')
