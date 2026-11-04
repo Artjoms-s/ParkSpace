@@ -1,4 +1,4 @@
-# ParkSpace — parking reservation prototype
+# ParkSpace - parking reservation prototype
 
 A small Flask web application for viewing parking spaces and making reservations.
 
