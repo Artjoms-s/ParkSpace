@@ -13,21 +13,6 @@ A small Flask web application for viewing parking spaces and making reservations
 
 If `DATABASE_URL` is not set, the app uses the local `parkspace.db` SQLite file.
 
-## Deploy to Render with Neon PostgreSQL
-
-1. Create a PostgreSQL database in Neon.
-2. In Render, connect this GitHub repository as a **Web Service**.
-3. Use these settings:
-   - Runtime: `Python 3`
-   - Build command: `pip install -r requirements.txt`
-   - Start command: `gunicorn app:app`
-4. Add environment variables in Render:
-   - `DATABASE_URL` = Neon pooled connection string (keep it secret)
-   - `SECRET_KEY` = a long random secret value
-5. Deploy. The database schema and initial demo parking spaces are created automatically at startup.
-
-The app uses PostgreSQL when `DATABASE_URL` is present and SQLite otherwise. The SQL schema is initialized automatically. Existing local SQLite accounts and reservations are **not automatically copied** to Neon; the online database starts with demo parking spaces and no user accounts.
-
 ## Included functionality
 
 - Parking-space overview and top-down layout.
