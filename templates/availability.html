@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Pieejamība {{ space.code }} · ParkSpace{% endblock %}
+{% block content %}
+<a class="back-link" href="{{ url_for('index') }}">← Atpakaļ uz autostāvvietām</a>
+<section class="availability-layout">
+  <div class="availability-intro">
+    <p class="eyebrow">AUTOSTĀVVIETAS PIEEJAMĪBA</p>
+    <h1>Vieta <span>{{ space.code }}</span></h1>
+    <p>Šeit redzami visi aktuālie rezervētie laika periodi.</p>
+    <div class="selected-space">
+      <div class="car-shape"><span></span></div>
+      <div><strong>{{ space.code }}</strong><small>Zona {{ space.zone }} · Autostāvvieta</small></div>
+    </div>
+  </div>
+  <div class="panel availability-panel">
+    <div class="availability-heading">
+      <div><h2>Rezervētie laiki</h2><p>Aktīvās rezervācijas, kas vēl nav beigušās</p></div>
+      <span class="availability-count">{{ bookings|length }}</span>
+    </div>
+    {% if bookings %}
+      <div class="booking-interval-list">
+        {% for booking in bookings %}
+          <article class="booking-interval">
+            <span class="interval-dot" aria-hidden="true"></span>
+            <div><strong>{{ booking.start_time|datetime_local }}</strong><span>līdz {{ booking.end_time|datetime_local }}</span></div>
+            <span class="pill active">Rezervēta</span>
+          </article>
+        {% endfor %}
+      </div>
+      <p class="availability-footnote">Vari izvēlēties citu laika periodu. Sistēma neļaus izveidot rezervāciju, kas pārklājas ar norādītajiem laikiem.</p>
+    {% else %}
+      <div class="empty-availability"><strong>Pašlaik nav aktīvu rezervāciju</strong><p>Šī vieta ir pieejama rezervēšanai.</p></div>
+    {% endif %}
+    {% if space.status == 'available' %}
+      <a class="primary-button inline-button availability-cta" href="{{ url_for('reserve', space_id=space.id) }}">Rezervēt brīvo laiku <span>→</span></a>
+    {% else %}
+      <p class="availability-footnote">Šī autostāvvieta pašlaik nav pieejama rezervēšanai.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

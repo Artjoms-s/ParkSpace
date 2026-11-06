@@ -151,6 +151,29 @@ def logout():
     return redirect(url_for('index'))
 
 
+@app.route('/availability/<int:space_id>')
+def availability(space_id):
+    db = get_db()
+    space = db.execute(
+        'SELECT id, code, zone, status FROM parking_spaces WHERE id=?',
+        (space_id,),
+    ).fetchone()
+    if space is None:
+        db.close()
+        flash('Autostāvvietas vieta nav atrasta.', 'error')
+        return redirect(url_for('index'))
+
+    now = datetime.now().isoformat(timespec='minutes')
+    bookings = db.execute('''
+        SELECT start_time, end_time
+        FROM reservations
+        WHERE space_id=? AND status='active' AND end_time > ?
+        ORDER BY start_time
+    ''', (space_id, now)).fetchall()
+    db.close()
+    return render_template('availability.html', space=space, bookings=bookings)
+
+
 @app.route('/reserve/<int:space_id>', methods=['GET', 'POST'])
 @login_required
 def reserve(space_id):
@@ -168,9 +191,16 @@ def reserve(space_id):
         'end_clock': request.form.get('end_clock', ''),
         'start_time': request.form.get('start_time', ''),
         'end_time': request.form.get('end_time', ''),
+        'car_number': request.form.get('car_number', '').strip().upper(),
     }
 
     if request.method == 'POST':
+        car_number = form_data['car_number']
+        if not re.fullmatch(r'[A-Z0-9 -]{2,12}', car_number):
+            db.close()
+            flash('Ievadi derīgu automašīnas reģistrācijas numuru (2–12 simboli).', 'error')
+            return render_template('reserve.html', space=space, form_data=form_data)
+
         start_raw = form_data['start_time'].strip()
         end_raw = form_data['end_time'].strip()
         if not start_raw or not end_raw:
@@ -208,14 +238,15 @@ def reserve(space_id):
             return render_template('reserve.html', space=space, form_data=form_data)
 
         db.execute('''
-            INSERT INTO reservations(space_id, customer_name, start_time, end_time, status, created_at, user_id)
-            VALUES(?, '', ?, ?, 'active', ?, ?)
+            INSERT INTO reservations(space_id, customer_name, start_time, end_time, status, created_at, user_id, car_number)
+            VALUES(?, '', ?, ?, 'active', ?, ?, ?)
         ''', (
             space_id,
             start.isoformat(timespec='minutes'),
             end.isoformat(timespec='minutes'),
             datetime.now().isoformat(timespec='minutes'),
             session['user_id'],
+            car_number,
         ))
         db.commit()
         db.close()
@@ -231,7 +262,7 @@ def reserve(space_id):
 def reservations():
     db = get_db()
     rows = db.execute('''
-        SELECT r.id, r.start_time, r.end_time, r.status,
+        SELECT r.id, r.start_time, r.end_time, r.status, r.car_number,
                p.code AS space_code, p.zone
         FROM reservations r
         JOIN parking_spaces p ON p.id=r.space_id

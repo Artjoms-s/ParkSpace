@@ -100,6 +100,7 @@ def init_db():
           user_id BIGINT REFERENCES users(id)
         );
         ALTER TABLE reservations ADD COLUMN IF NOT EXISTS user_id BIGINT REFERENCES users(id);
+        ALTER TABLE reservations ADD COLUMN IF NOT EXISTS car_number TEXT NOT NULL DEFAULT '';
         CREATE INDEX IF NOT EXISTS idx_reservations_space_time
           ON reservations(space_id, start_time, end_time, status);
         CREATE INDEX IF NOT EXISTS idx_reservations_user
@@ -141,6 +142,8 @@ def init_db():
         }
         if 'user_id' not in reservation_columns:
             db.execute('ALTER TABLE reservations ADD COLUMN user_id INTEGER REFERENCES users(id)')
+        if 'car_number' not in reservation_columns:
+            db.execute("ALTER TABLE reservations ADD COLUMN car_number TEXT NOT NULL DEFAULT ''")
         db.executescript('''
           CREATE INDEX IF NOT EXISTS idx_reservations_space_time
             ON reservations(space_id, start_time, end_time, status);

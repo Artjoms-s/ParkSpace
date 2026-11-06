@@ -36,7 +36,7 @@
               {% else %}Brīva{% endif %}
             </span>
             {% if space.status == 'available' %}
-              <a class="small-button" href="{{ url_for('reserve', space_id=space.id) }}">{{ 'Pārbaudīt laiku' if space.has_reservation else 'Rezervēt' }}</a>
+              <a class="small-button" href="{{ url_for('availability', space_id=space.id) if space.has_reservation else url_for('reserve', space_id=space.id) }}">{{ 'Pārbaudīt laiku' if space.has_reservation else 'Rezervēt' }}</a>
             {% else %}
               <span class="disabled-label">Nav pieejama</span>
             {% endif %}

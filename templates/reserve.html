@@ -6,13 +6,19 @@
   <div class="form-intro">
     <p class="eyebrow">REZERVĀCIJAS IZVEIDE</p>
     <h1>Rezervē vietu <span>{{ space.code }}</span></h1>
-    <p>Izvēlies sākuma un beigu datumu un laiku. Vārds nav jāievada — rezervācija tiks piesaistīta tavam kontam.</p>
+    <p>Izvēlies sākuma un beigu datumu un laiku, kā arī norādi automašīnas reģistrācijas numuru. Rezervācija tiks piesaistīta tavam kontam.</p>
     <div class="selected-space"><div class="car-shape"><span></span></div><div><strong>{{ space.code }}</strong><small>Zona {{ space.zone }} · Autostāvvieta</small></div></div>
-    <div class="time-note"><span class="note-clock">◷</span><div><strong>Laika pārbaude</strong><p>Sistēma neļaus rezervēt vienu vietu divreiz vienā un tajā pašā laika periodā.</p></div></div>
   </div>
 
   <form method="post" class="panel form-panel reservation-form" data-reservation-form>
     <input type="hidden" name="next" value="{{ request.args.get('next', '') }}">
+    <div class="datetime-block car-number-block">
+      <label for="car_number">Automašīnas numurs</label>
+      <input id="car_number" name="car_number" type="text" required minlength="2" maxlength="12"
+             pattern="[A-Za-z0-9 -]{2,12}" autocomplete="off" placeholder="Piemēram, AB-1234"
+             value="{{ form_data.car_number }}">
+      <small class="field-hint">Ievadi automašīnas reģistrācijas numuru.</small>
+    </div>
     <div class="datetime-block">
       <div class="datetime-title"><span class="step-number">1</span><div><strong>Sākums</strong><small>Kad vēlies ierasties?</small></div></div>
       <label for="start_date">Datums</label>
