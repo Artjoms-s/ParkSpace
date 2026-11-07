@@ -1,4 +1,4 @@
-# ParkSpace — autostāvvietu rezervēšanas prototips
+# ParkSpace - autostāvvietu rezervēšanas prototips
 
 Neliela Flask tīmekļa lietojumprogramma autostāvvietu apskatei un rezervēšanai.
 
