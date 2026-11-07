@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Administrēšana · ParkSpace{% endblock %}
+{% block content %}
+<section class="page-heading">
+  <p class="eyebrow">PARKSPACE ADMINISTRĀCIJA</p>
+  <h1>Administrēšanas <span>panelis</span></h1>
+  <p>Pārskati autostāvvietas stāvokli un pārvaldi sistēmas datus.</p>
+</section>
+<div class="admin-stats">
+  <div class="admin-stat"><strong>{{ counts.spaces }}</strong><span>Autostāvvietas</span></div>
+  <div class="admin-stat"><strong>{{ counts.active_reservations }}</strong><span>Aktīvas rezervācijas</span></div>
+  <div class="admin-stat"><strong>{{ counts.users }}</strong><span>Lietotāju konti</span></div>
+</div>
+<div class="admin-links">
+  <a class="primary-button" href="{{ url_for('admin_reservations') }}">Pārvaldīt rezervācijas →</a>
+  <a class="secondary-button" href="{{ url_for('admin_users') }}">Pārvaldīt lietotājus →</a>
+</div>
+<div class="section-heading"><div><h2>Autostāvvietu statusi</h2><p>Šī ir tā pati autostāvvietu shēma, ko redz autovadītāji.</p></div></div>
+<div class="admin-space-list">
+{% for space in spaces %}
+  <article class="admin-space-row">
+    <div><strong>{{ space.code }}</strong><small>Zona {{ space.zone }}</small></div>
+    <span class="pill {{ 'active' if space.status == 'available' else ('cancelled' if space.status == 'inactive' else 'admin-occupied') }}">
+      {% if space.status == 'available' %}Brīva{% elif space.status == 'occupied' %}Aizņemta{% else %}Slēgta{% endif %}
+      {% if space.has_reservation %} · Ir rezervācija{% endif %}
+    </span>
+    <form method="post" action="{{ url_for('admin_space_status', space_id=space.id) }}" class="admin-inline-form">
+      <select name="status" aria-label="Jaunais statuss {{ space.code }}">
+        <option value="available" {% if space.status == 'available' %}selected{% endif %}>Brīva</option>
+        <option value="occupied" {% if space.status == 'occupied' %}selected{% endif %}>Aizņemta</option>
+        <option value="inactive" {% if space.status == 'inactive' %}selected{% endif %}>Slēgta remontam</option>
+      </select>
+      <button class="small-button" type="submit">Saglabāt</button>
+    </form>
+  </article>
+{% endfor %}
+</div>
+<p class="admin-note">Statuss “Rezervēta” tiek noteikts automātiski no aktīvajām rezervācijām un to laika intervāliem. Tas nav manuāli iestatāms statuss.</p>
+{% endblock %}

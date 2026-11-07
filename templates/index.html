@@ -35,7 +35,16 @@
               {% elif space.has_reservation %}Ir rezervācija
               {% else %}Brīva{% endif %}
             </span>
-            {% if space.status == 'available' %}
+            {% if current_user_is_admin %}
+              <form class="map-admin-form" method="post" action="{{ url_for('admin_space_status', space_id=space.id) }}">
+                <select name="status" aria-label="Mainīt {{ space.code }} statusu">
+                  <option value="available" {% if space.status == 'available' %}selected{% endif %}>Brīva</option>
+                  <option value="occupied" {% if space.status == 'occupied' %}selected{% endif %}>Aizņemta</option>
+                  <option value="inactive" {% if space.status == 'inactive' %}selected{% endif %}>Slēgta</option>
+                </select>
+                <button class="small-button" type="submit">Mainīt</button>
+              </form>
+            {% elif space.status == 'available' %}
               <a class="small-button" href="{{ url_for('availability', space_id=space.id) if space.has_reservation else url_for('reserve', space_id=space.id) }}">{{ 'Pārbaudīt laiku' if space.has_reservation else 'Rezervēt' }}</a>
             {% else %}
               <span class="disabled-label">Nav pieejama</span>

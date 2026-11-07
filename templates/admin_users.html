@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Lietotāju pārvaldība · ParkSpace{% endblock %}
+{% block content %}
+<a class="back-link" href="{{ url_for('admin_dashboard') }}">← Atpakaļ uz administrēšanu</a>
+<section class="page-heading"><p class="eyebrow">ADMINISTRĀCIJA</p><h1>Lietotāju <span>konti</span></h1><p>Aktivizē vai deaktivizē lietotāju piekļuvi sistēmai.</p></section>
+<div class="admin-table-wrap"><table class="admin-table">
+<thead><tr><th>Lietotājvārds</th><th>Loma</th><th>Izveidots</th><th>Statuss</th><th>Darbība</th></tr></thead>
+<tbody>{% for u in users %}
+<tr><td><strong>{{ u.username }}</strong></td><td>{{ 'Administrators' if u.role == 'admin' else 'Autovadītājs' }}</td><td>{{ u.created_at|datetime_local }}</td>
+<td><span class="pill {{ 'active' if u.is_active else 'cancelled' }}">{{ 'Aktīvs' if u.is_active else 'Deaktivizēts' }}</span></td>
+<td>{% if u.role == 'admin' %}<span class="field-hint">Administratora konts</span>{% else %}
+<form method="post" action="{{ url_for('admin_toggle_user', user_id=u.id) }}"><button class="cancel-button" type="submit">{{ 'Deaktivizēt' if u.is_active else 'Aktivizēt' }}</button></form>{% endif %}</td></tr>
+{% endfor %}</tbody></table></div>
+{% endblock %}

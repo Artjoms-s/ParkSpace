@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Rezervāciju pārvaldība · ParkSpace{% endblock %}
+{% block content %}
+<a class="back-link" href="{{ url_for('admin_dashboard') }}">← Atpakaļ uz administrēšanu</a>
+<section class="page-heading"><p class="eyebrow">ADMINISTRĀCIJA</p><h1>Rezervāciju <span>vēsture</span></h1><p>Visas aktīvās un iepriekšējās rezervācijas.</p></section>
+{% if reservations %}
+<div class="admin-table-wrap"><table class="admin-table">
+<thead><tr><th>Vieta</th><th>Lietotājs</th><th>Auto numurs</th><th>No</th><th>Līdz</th><th>Statuss</th><th>Darbība</th></tr></thead>
+<tbody>{% for r in reservations %}
+<tr><td><strong>{{ r.space_code }}</strong><small>Zona {{ r.zone }}</small></td><td>{{ r.username or '—' }}</td><td>{{ r.car_number or '—' }}</td><td>{{ r.start_time|datetime_local }}</td><td>{{ r.end_time|datetime_local }}</td>
+<td><span class="pill {{ 'active' if r.status == 'active' else 'cancelled' }}">{{ 'Aktīva' if r.status == 'active' else 'Atcelta' }}</span></td>
+<td>{% if r.status == 'active' %}<form method="post" action="{{ url_for('admin_cancel_reservation', reservation_id=r.id) }}" onsubmit="return confirm('Vai tiešām atcelt šo rezervāciju?')"><button class="cancel-button" type="submit">Atcelt</button></form>{% else %}—{% endif %}</td></tr>
+{% endfor %}</tbody></table></div>
+{% else %}<div class="empty-state"><h2>Rezervāciju vēl nav</h2><p>Tiklīdz tiks izveidota pirmā rezervācija, tā būs redzama šeit.</p></div>{% endif %}
+{% endblock %}

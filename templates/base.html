@@ -14,6 +14,7 @@
       <a href="{{ url_for('index') }}">Autostāvvietas</a>
       {% if current_user_id %}
         <a href="{{ url_for('reservations') }}">Manas rezervācijas</a>
+        {% if current_user_is_admin %}<a href="{{ url_for('admin_dashboard') }}">Administrēšana</a>{% endif %}
         <span class="nav-user">{{ current_username }}</span>
         <form method="post" action="{{ url_for('logout') }}" class="nav-logout"><button type="submit">Iziet</button></form>
       {% else %}

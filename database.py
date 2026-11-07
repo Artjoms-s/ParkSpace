@@ -76,8 +76,12 @@ def init_db():
           id BIGSERIAL PRIMARY KEY,
           username TEXT NOT NULL UNIQUE,
           password_hash TEXT NOT NULL,
-          created_at TEXT NOT NULL
+          created_at TEXT NOT NULL,
+          role TEXT NOT NULL DEFAULT 'driver',
+          is_active BOOLEAN NOT NULL DEFAULT TRUE
         );
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'driver';
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;
         CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username_lower ON users (LOWER(username));
 
         CREATE TABLE IF NOT EXISTS parking_spaces (
@@ -137,6 +141,12 @@ def init_db():
           FOREIGN KEY(user_id) REFERENCES users(id)
         );
         ''')
+        user_columns = {row['name'] for row in db.execute('PRAGMA table_info(users)').fetchall()}
+        if 'role' not in user_columns:
+            db.execute("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'driver'")
+        if 'is_active' not in user_columns:
+            db.execute("ALTER TABLE users ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1")
+
         reservation_columns = {
             row['name'] for row in db.execute('PRAGMA table_info(reservations)').fetchall()
         }

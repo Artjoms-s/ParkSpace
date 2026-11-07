@@ -7,7 +7,13 @@
     <p class="eyebrow">REZERVĀCIJAS IZVEIDE</p>
     <h1>Rezervē vietu <span>{{ space.code }}</span></h1>
     <p>Izvēlies sākuma un beigu datumu un laiku, kā arī norādi automašīnas reģistrācijas numuru. Rezervācija tiks piesaistīta tavam kontam.</p>
-    <div class="selected-space"><div class="car-shape"><span></span></div><div><strong>{{ space.code }}</strong><small>Zona {{ space.zone }} · Autostāvvieta</small></div></div>
+    <div class="selected-space"><div class="selected-space-car" aria-hidden="true">
+        <div class="parking-car">
+          <span class="car-window"></span><span class="car-windshield"></span>
+          <span class="car-light front-left"></span><span class="car-light front-right"></span>
+          <span class="car-light rear-left"></span><span class="car-light rear-right"></span>
+        </div>
+      </div><div><strong>{{ space.code }}</strong><small>Zona {{ space.zone }} · Autostāvvieta</small></div></div>
   </div>
 
   <form method="post" class="panel form-panel reservation-form" data-reservation-form>

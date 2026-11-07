@@ -6,7 +6,16 @@
   <div class="reservation-list">
     {% for r in reservations %}
       <article class="reservation-row">
-        <div class="reservation-mark"><div class="car-shape reservation-car"><span></span></div></div>
+        <div class="reservation-mark reservation-car-mark" aria-hidden="true">
+          <div class="parking-car reservation-car">
+            <span class="car-window"></span>
+            <span class="car-windshield"></span>
+            <span class="car-light front-left"></span>
+            <span class="car-light front-right"></span>
+            <span class="car-light rear-left"></span>
+            <span class="car-light rear-right"></span>
+          </div>
+        </div>
         <div class="reservation-main"><strong>{{ r.space_code }} · Zona {{ r.zone }}</strong><span>{{ r.start_time|datetime_local }} – {{ r.end_time|datetime_local }}</span><small class="reservation-plate">Auto: {{ r.car_number or "Nav norādīts" }}</small></div>
         <div class="reservation-actions"><span class="pill {{ 'active' if r.status == 'active' else 'cancelled' }}">{{ 'Aktīva' if r.status == 'active' else 'Atcelta' }}</span>{% if r.status == 'active' %}<form method="post" action="{{ url_for('cancel', reservation_id=r.id) }}" onsubmit="return confirm('Vai tiešām atcelt šo rezervāciju?');"><button class="cancel-button" type="submit">Atcelt</button></form>{% endif %}</div>
       </article>

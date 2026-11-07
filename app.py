@@ -25,6 +25,7 @@ def inject_session_user():
     return {
         'current_user_id': session.get('user_id'),
         'current_username': session.get('username'),
+        'current_user_is_admin': session.get('role') == 'admin',
     }
 
 
@@ -34,6 +35,20 @@ def login_required(view):
         if not session.get('user_id'):
             flash('Lai turpinātu, vispirms pieslēdzies savam kontam.', 'error')
             return redirect(url_for('login', next=request.path))
+        return view(*args, **kwargs)
+    return wrapped_view
+
+
+
+def admin_required(view):
+    @wraps(view)
+    def wrapped_view(*args, **kwargs):
+        if not session.get('user_id'):
+            flash('Lai piekļūtu administratora panelim, vispirms pieslēdzies.', 'error')
+            return redirect(url_for('login', next=request.path))
+        if session.get('role') != 'admin':
+            flash('Šī sadaļa pieejama tikai administratoram.', 'error')
+            return redirect(url_for('index'))
         return view(*args, **kwargs)
     return wrapped_view
 
@@ -114,6 +129,7 @@ def register():
         session.clear()
         session['user_id'] = user_id
         session['username'] = username
+        session['role'] = 'driver'
         flash('Konts izveidots. Tagad vari rezervēt autostāvvietu.', 'success')
         return redirect(safe_next_url())
 
@@ -129,15 +145,19 @@ def login():
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '')
         db = get_db()
-        user = db.execute('SELECT id, username, password_hash FROM users WHERE LOWER(username)=LOWER(?)', (username,)).fetchone()
+        user = db.execute('SELECT id, username, password_hash, role, is_active FROM users WHERE LOWER(username)=LOWER(?)', (username,)).fetchone()
         db.close()
         if user is None or not check_password_hash(user['password_hash'], password):
             flash('Lietotājvārds vai parole nav pareiza.', 'error')
+            return render_template('login.html')
+        if not user['is_active']:
+            flash('Šis konts ir deaktivizēts. Sazinies ar administratoru.', 'error')
             return render_template('login.html')
 
         session.clear()
         session['user_id'] = user['id']
         session['username'] = user['username']
+        session['role'] = user['role']
         flash('Veiksmīgi pieslēdzies.', 'success')
         return redirect(safe_next_url())
 
@@ -290,6 +310,115 @@ def cancel(reservation_id):
         flash('Rezervācija atcelta.', 'success')
     db.close()
     return redirect(url_for('reservations'))
+
+
+
+
+@app.route('/admin')
+@admin_required
+def admin_dashboard():
+    db = get_db()
+    now = datetime.now().isoformat(timespec='minutes')
+    spaces = db.execute('''
+        SELECT p.id, p.code, p.zone, p.status,
+          EXISTS (SELECT 1 FROM reservations r
+                  WHERE r.space_id=p.id AND r.status='active' AND r.end_time > ?) AS has_reservation
+        FROM parking_spaces p ORDER BY p.zone, p.code
+    ''', (now,)).fetchall()
+    counts = {
+        'users': db.execute('SELECT COUNT(*) AS n FROM users').fetchone()['n'],
+        'active_reservations': db.execute("SELECT COUNT(*) AS n FROM reservations WHERE status='active' AND end_time > ?", (now,)).fetchone()['n'],
+        'spaces': len(spaces),
+    }
+    db.close()
+    return render_template('admin_dashboard.html', spaces=spaces, counts=counts)
+
+
+@app.route('/admin/space/<int:space_id>/status', methods=['POST'])
+@admin_required
+def admin_space_status(space_id):
+    status = request.form.get('status', '')
+    if status not in ('available', 'occupied', 'inactive'):
+        flash('Norādīts nederīgs stāvvietas statuss.', 'error')
+        return redirect(url_for('admin_dashboard'))
+    db = get_db()
+    space = db.execute('SELECT id, code FROM parking_spaces WHERE id=?', (space_id,)).fetchone()
+    if space is None:
+        db.close()
+        flash('Stāvvieta nav atrasta.', 'error')
+        return redirect(url_for('admin_dashboard'))
+    db.execute('UPDATE parking_spaces SET status=? WHERE id=?', (status, space_id))
+    db.commit()
+    db.close()
+    labels = {'available': 'Brīva', 'occupied': 'Aizņemta', 'inactive': 'Slēgta'}
+    flash(f"Vietas {space['code']} statuss mainīts uz: {labels[status]}.", 'success')
+    return redirect(url_for('admin_dashboard'))
+
+
+@app.route('/admin/reservations')
+@admin_required
+def admin_reservations():
+    db = get_db()
+    rows = db.execute('''
+        SELECT r.id, r.start_time, r.end_time, r.status, r.car_number,
+               p.code AS space_code, p.zone, u.username
+        FROM reservations r
+        JOIN parking_spaces p ON p.id=r.space_id
+        LEFT JOIN users u ON u.id=r.user_id
+        ORDER BY r.start_time DESC
+    ''').fetchall()
+    db.close()
+    return render_template('admin_reservations.html', reservations=rows)
+
+
+@app.route('/admin/reservation/<int:reservation_id>/cancel', methods=['POST'])
+@admin_required
+def admin_cancel_reservation(reservation_id):
+    db = get_db()
+    row = db.execute('SELECT id, status FROM reservations WHERE id=?', (reservation_id,)).fetchone()
+    if row is None:
+        flash('Rezervācija nav atrasta.', 'error')
+    elif row['status'] != 'active':
+        flash('Šī rezervācija jau nav aktīva.', 'error')
+    else:
+        db.execute("UPDATE reservations SET status='cancelled' WHERE id=?", (reservation_id,))
+        db.commit()
+        flash('Rezervācija atcelta administratora darbības rezultātā.', 'success')
+    db.close()
+    return redirect(url_for('admin_reservations'))
+
+
+@app.route('/admin/users')
+@admin_required
+def admin_users():
+    db = get_db()
+    users = db.execute('''
+        SELECT id, username, role, is_active, created_at
+        FROM users ORDER BY created_at DESC
+    ''').fetchall()
+    db.close()
+    return render_template('admin_users.html', users=users)
+
+
+@app.route('/admin/user/<int:user_id>/toggle', methods=['POST'])
+@admin_required
+def admin_toggle_user(user_id):
+    if user_id == session['user_id']:
+        flash('Nevari deaktivizēt savu administratora kontu.', 'error')
+        return redirect(url_for('admin_users'))
+    db = get_db()
+    user = db.execute('SELECT id, username, role, is_active FROM users WHERE id=?', (user_id,)).fetchone()
+    if user is None:
+        flash('Lietotājs nav atrasts.', 'error')
+    elif user['role'] == 'admin':
+        flash('Citu administratoru kontu no šīs sadaļas nevar deaktivizēt.', 'error')
+    else:
+        new_state = 0 if user['is_active'] else 1
+        db.execute('UPDATE users SET is_active=? WHERE id=?', (new_state, user_id))
+        db.commit()
+        flash(f"Konts {user['username']} {'aktivizēts' if new_state else 'deaktivizēts'}.", 'success')
+    db.close()
+    return redirect(url_for('admin_users'))
 
 
 # Initialize schema on process startup (including Gunicorn on Render).
