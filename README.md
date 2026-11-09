@@ -25,5 +25,5 @@ Rezervētas stāvvietas tiek noteiktas no aktīvajām rezervācijām un to laika
 - Railway – platforma lietojumprogrammas izvietošanai un mitināšanai.
 
 ## Projecta autori
-241RDB017 Artjoms Straumanis
+241RDB017 Artjoms Straumanis  
 251RDB175 Kārlis Gruduls
