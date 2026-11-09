@@ -14,4 +14,16 @@ Neliela Flask tīmekļa lietojumprogramma autostāvvietu apskatei un rezervēša
 
 ## Administratora konts
 
-Administratora panelī ir pieejama autostāvvietu statusu maiņa, visu rezervāciju vēsture un lietotāju kontu aktivizēšana/deaktivizēšana. Rezervēts statuss tiek noteikts no aktīvām rezervācijām un to laika intervāliem; administratora manuāli iestatāmie vietas statusi ir Brīva, Aizņemta un Slēgta.
+Administratora panelī ir pieejama autostāvvietu statusu maiņa, visu rezervāciju vēstures un lietotāju kontu aktivizēšana/deaktivizēšana.
+Rezervētas stāvvietas tiek noteiktas no aktīvajām rezervācijām un to laika intervāliem. Administrators manuāli iestata vietas statusu: Brīva, Aizņemta vai Slēgta.
+
+## Izmantotās tehnoloģijas
+- Python – lietojumprogrammas programmēšanas valoda.
+- Flask – tīmekļa lietojumprogrammas izstrādes ietvars.
+- SQLite – datu bāzes pārvaldības sistēma.
+- HTML / CSS / JavaScript – lietotāja saskarnes izveide.
+- Railway – platforma lietojumprogrammas izvietošanai un mitināšanai.
+
+## Projecta autori
+241RDB017 Artjoms Straumanis
+251RDB175 Kārlis Gruduls
