@@ -12,5 +12,5 @@ Prototipa izstrādes laikā tika izveidots testa konts ar administratora tiesīb
 241RDB017 Artjoms Straumanis  
 251RDB175 Kārlis Gruduls
 
-##Links uz prototipu:  
+## Links uz prototipu:  
 https://parkspace-production-4c41.up.railway.app/
