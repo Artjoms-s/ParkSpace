@@ -5,10 +5,12 @@ Neliela Flask tīmekļa lietojumprogramma autostāvvietu apskatei un rezervēša
 ## Iekļautās funkcijas
 
 - Autostāvvietu pārskats un izkārtojums no augšas uz leju.
-- Lietotāju reģistrācija un pieteikšanās ar hashētiem parolēm.
+- Lietotāju reģistrācija un pieteikšanās ar hashētiem paroļu datiem.
 - Rezervācijas, kas saistītas ar pieteikušos lietotāju.
 - Rezervāciju pārklāšanās pārbaude un atcelšana.
 - Lietotājam specifisks rezervāciju saraksts.
+- Brīvo un aizņemto autostāvvietu attēlošana.
+- Administratora panelis autostāvvietu un lietotāju pārvaldībai.
 
 ## Administratora konts
 
