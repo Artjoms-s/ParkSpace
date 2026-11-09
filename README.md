@@ -4,7 +4,7 @@ Neliela Flask tīmekļa lietojumprogramma autostāvvietu apskatei un rezervēša
 
 ## Administratora konts
 
-Prototipa izstrādes laikā tika izveidots testa konts ar administratora tiesībām. Dati, lai pieteiktos, ir šādi:  
+Prototipa izstrādes laikā tika izveidots testa konts ar administratora tiesībām. Dati, lai pieteiktos:  
 **Nickname:** *admin*  
 **password:** *admin_password*
 
